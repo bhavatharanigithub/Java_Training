@@ -1,22 +1,3 @@
--- Telecom Usage and Billing Reports
--- SQL dialect: MySQL 8.0+
---
--- ASSUMED TABLE STRUCTURE (adjust column names if your supplied schema differs):
--- subscribers(subscriber_id, subscriber_name, circle_id, plan_id, data_limit_gb)
--- plans(plan_id, plan_name, monthly_rental)
--- call_records(call_id, subscriber_id, call_date, duration_minutes, data_used_gb)
--- invoices(invoice_id, subscriber_id, invoice_number, invoice_date, due_date,
---          paid_date, amount, invoice_status)
--- circles(circle_id, circle_name)
---
--- Relationship assumptions:
--- subscribers.plan_id -> plans.plan_id
--- subscribers.circle_id -> circles.circle_id
--- call_records.subscriber_id -> subscribers.subscriber_id
--- invoices.subscriber_id -> subscribers.subscriber_id
---
--- If data usage is stored in MB, convert the data-limit comparison accordingly.
--- Run each SELECT separately. These are reporting queries and do not modify data.
 
 USE telecom_db;
 
@@ -198,4 +179,3 @@ LEFT JOIN invoices i ON i.subscriber_id = s.subscriber_id
 GROUP BY p.plan_id, p.plan_name, c.circle_id, c.circle_name
 ORDER BY p.plan_name, c.circle_name;
 
--- END OF REPORT QUERIES
