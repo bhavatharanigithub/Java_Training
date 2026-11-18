@@ -2,7 +2,7 @@ import java.util.*;
 
 public class LogisticsNetwork {
 
-    // Task 1: BST for storing hub codes
+
     static class Node {
         int data;
         Node left, right;
@@ -43,7 +43,6 @@ public class LogisticsNetwork {
         return 1 + Math.max(height(root.left), height(root.right));
     }
 
-    // Task 2: Parcel tracking using HashMap
     static void checkParcel(Map<String, Set<String>> parcels,
                             String tracking, String hub) {
 
@@ -55,7 +54,6 @@ public class LogisticsNetwork {
             System.out.println(tracking + " scanned at " + hub);
     }
 
-    // Task 3: Graph using adjacency list
     static Map<Integer, List<Integer>> graph = new HashMap<>();
 
     static void addRoute(int a, int b) {
@@ -110,7 +108,6 @@ public class LogisticsNetwork {
         }
     }
 
-    // Task 4: Sliding window for 4-hour average
     static void maxAverage(int[] parcels) {
         int sum = 0;
 
@@ -135,7 +132,6 @@ public class LogisticsNetwork {
         System.out.println("Highest average: " + maxSum / 4.0);
     }
 
-    // Task 5: Palindrome using two pointers
     static boolean isPalindrome(String route) {
         int left = 0, right = route.length() - 1;
 

@@ -1,0 +1,19 @@
+Summary,Issue Type,Priority,Story Points,Epic Name,Description
+Booking,Epic,Medium,,Booking,Epic: Booking
+Rescheduling and Cancellation,Epic,Medium,,Rescheduling and Cancellation,Epic: Rescheduling and Cancellation
+Reminders,Epic,Medium,,Reminders,Epic: Reminders
+Doctor Schedule Management,Epic,Medium,,Doctor Schedule Management,Epic: Doctor Schedule Management
+US11 - to set my weekly working days and hours,Story,Highest,5,Doctor Schedule Management,"As a doctor, I want to set my weekly working days and hours so that patients can only book slots when I am available."
+US14 - to set the slot duration for each doctor,Story,Highest,2,Doctor Schedule Management,"As a hospital administrator, I want to set the slot duration for each doctor so that slots are generated correctly."
+US01 - to search for doctors by specialty,Story,Highest,3,Booking,"As a patient, I want to search for doctors by specialty so that I can find the right doctor."
+US02 - to view a doctor's available time slots,Story,Highest,3,Booking,"As a patient, I want to view a doctor's available time slots so that I can choose a convenient time."
+US03 - to book an available time slot with a doctor,Story,Highest,5,Booking,"As a patient, I want to book an available time slot with a doctor so that I can consult them at a convenient time."
+US04 - to view my upcoming appointments,Story,Highest,2,Booking,"As a patient, I want to view my upcoming appointments so that I can keep track of my visits."
+"US06 - to cancel a confirmed appointment up to 2 hours before its start time, after a conf",Story,Highest,3,Rescheduling and Cancellation,"As a patient, I want to cancel a confirmed appointment up to 2 hours before its start time, after a confirmation prompt, so that the doctor's time is not wasted."
+US07 - a slot that was cancelled by another patient to show as available,Story,Highest,2,Rescheduling and Cancellation,"As a patient searching for a slot, I want a slot that was cancelled by another patient to show as available so that I can book it."
+US05 - to choose a different available slot with the same doctor,Story,High,5,Rescheduling and Cancellation,"As a patient with a confirmed appointment, I want to choose a different available slot with the same doctor so that I can change my visit time."
+US08 - to receive a reminder 24 hours before my appointment,Story,High,5,Reminders,"As a patient, I want to receive a reminder 24 hours before my appointment so that I do not miss it."
+US10 - a confirmation notification after booking,Story,High,2,Reminders,"As a patient, I want a confirmation notification after booking so that I know my appointment is secured."
+US12 - to block time for leave,Story,High,3,Doctor Schedule Management,"As a doctor, I want to block time for leave so that patients cannot book me while I am away."
+US13 - to view my day's appointments,Story,Medium,3,Doctor Schedule Management,"As a doctor, I want to view my day's appointments so that I can prepare for consultations."
+US09 - to choose push or SMS reminders,Story,Medium,3,Reminders,"As a patient, I want to choose push or SMS reminders so that I am reminded in the way I prefer."
