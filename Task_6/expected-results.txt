@@ -1,0 +1,122 @@
+DAY 8 - SET 2: INSURANCE POLICY REPORTING
+Expected Results and Join Explanations (MySQL 8.4)
+
+The SQL script creates a separate database named insurance_reporting_db.
+Its sample policy dates use CURDATE(), so expiry and monthly reports adapt
+to the date on which you run the script. Ages are also calculated as of today.
+
+1. POLICIES EXPIRING IN THE NEXT 30 DAYS
+Expected sample policies:
+- 1001 - Ananya Kumar - Health Insurance - expires in 10 days.
+- 1004 - Meera Iyer - Health Insurance - expires in 25 days.
+The output also contains masked policy numbers and days_until_expiry.
+INNER JOIN is appropriate because a policy must have a matching customer
+and product to appear in this detailed report. DATE_ADD creates the 30-day
+cutoff; DATEDIFF calculates days remaining. SUBSTRING and CONCAT mask IDs.
+
+2. PREMIUM PER PRODUCT
+Expected aggregate values:
+
+Product              Policies   Total annual premium
+Health Insurance        3          36,000.00
+Motor Insurance         3          28,000.00
+Life Insurance          2          35,000.00
+Travel Insurance        2           9,000.00
+
+The query also returns average annual premium. INNER JOIN is appropriate
+because the report lists products that have at least one policy.
+
+3. CUSTOMERS WITH MORE THAN ONE ACTIVE POLICY
+Expected customers:
+- Ananya Kumar (101): 2 active policies; premium total 20,000.00.
+- Rahul Sharma (102): 2 active policies; premium total 34,000.00.
+- Divya Nair (105): 2 active policies; premium total 16,000.00.
+INNER JOIN finds customers with policies. WHERE filters active, unexpired
+policies. GROUP BY creates customer groups and HAVING keeps counts above one.
+
+4. CLAIM RATIO PER PRODUCT
+Definition used in this exercise:
+    Claim ratio (%) = total claim amount / total annual premium * 100
+
+Expected values:
+
+Product              Premium total   Claim total   Claim ratio
+Health Insurance       36,000.00      16,500.00       45.83%
+Motor Insurance        28,000.00       5,000.00       17.86%
+Life Insurance         35,000.00      15,000.00       42.86%
+Travel Insurance        9,000.00           0.00        0.00%
+
+Claims are first aggregated by policy in a CTE. This prevents multiple claim
+rows for one policy from multiplying its premium in the final sum.
+INNER JOIN links policies to products. LEFT JOIN retains policies without
+claims and COALESCE treats their claim amount as zero.
+
+5. POLICIES WITHOUT CLAIMS
+Expected policy IDs: 1006, 1007, 1009 and 1010.
+LEFT JOIN keeps every policy even if there is no matching claim. The
+WHERE claim_id IS NULL condition returns only policies without claims.
+INNER JOINs to customers and products supply readable names.
+
+6. AVERAGE PREMIUM BY AGE BAND
+The query returns these four bands:
+- Under 25
+- 25-39
+- 40-59
+- 60+
+It reports customer_count, policy_count and average_annual_premium for
+active policies. Exact age membership depends on the execution date.
+CROSS JOIN creates every age-band/customer combination. LEFT JOIN attaches
+matching active policies and preserves bands with no matching policy.
+An empty band's average is NULL.
+
+7. MONTHLY NEW POLICIES
+The result contains one row for each product and the number of policies
+whose start_date falls in the current calendar month. Policy 1007 starts
+today, so Life Insurance has at least one new policy. The exact counts are
+calculated when you run the script.
+LEFT JOIN ensures products with zero new policies still appear. The date
+range includes the first day of this month and excludes the first day of
+the next month.
+
+8. TOP FIVE AGENTS BY PREMIUM
+Expected ranking from the sample data:
+1. Priya Menon (202): 38,000.00
+2. Sanjay Patel (201): 34,000.00
+3. Vikram Singh (203): 25,000.00
+4. Nisha Reddy (204): 16,000.00
+There are four sample agents, so LIMIT 5 returns four rows. INNER JOIN
+includes agents who have at least one policy.
+
+EXTRA: PRODUCTS WITH CLAIM RATIO ABOVE 60%
+Expected result: no rows for the supplied sample data, because none of the
+four product ratios exceeds 60%. GROUP BY calculates one ratio per product;
+HAVING filters the grouped results after aggregation.
+
+JOIN CHOICE SUMMARY
+- INNER JOIN: Queries 1, 2, 3 and 8. Use when matching related records are
+  required for the report.
+- LEFT JOIN: Queries 4, 5 and 7. Use when rows from the main table must
+  remain even if a related claim or monthly policy is missing.
+- CROSS JOIN: Query 6. Use to generate all age-band/customer combinations
+  before matching policies to age bands.
+
+FUNCTIONS
+- DATE_ADD: adds 30 days to the current date for the expiry window.
+- DATEDIFF: returns the number of days between today and policy expiry.
+- CASE: classifies ages into readable age bands.
+- CONCAT: joins visible and masked parts of a policy number.
+- SUBSTRING: extracts selected characters from the policy number.
+
+IMPORTANT BUSINESS DEFINITION
+This exercise uses total claim amount divided by total annual premium as a
+simple claim ratio. A real insurer may use incurred claims divided by earned
+premium for a defined reporting period, and may include outstanding reserves.
+Confirm the insurer's formal definition before using this in production.
+
+HOW TO RUN
+1. Open MySQL Workbench and connect to MySQL 8.4.
+2. Open reports.sql and execute the complete script.
+3. Review each result grid after its labelled query.
+4. Compare the results with this document.
+
+The data is synthetic and intended for SQL practice only.
