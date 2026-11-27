@@ -1,0 +1,137 @@
+DAY 8 - TRANSACTION ISOLATION NOTE
+MySQL 8.4 LTS | InnoDB | Two-session experiment
+
+1. AUTOCOMMIT
+
+By default, MySQL normally has autocommit enabled. Each successful standalone
+statement is committed automatically.
+
+Check the current setting:
+    SELECT @@autocommit;
+
+Session A:
+    SET autocommit = 1;
+    UPDATE bank_db.accounts SET balance = balance + 100 WHERE account_id = 101;
+    -- This update is committed automatically.
+
+To demonstrate manual commit:
+    SET autocommit = 0;
+    UPDATE bank_db.accounts SET balance = balance + 100 WHERE account_id = 101;
+    SELECT balance FROM bank_db.accounts WHERE account_id = 101;
+    ROLLBACK;
+    -- The +100 change is undone because it was not committed.
+
+Restore the usual setting:
+    SET autocommit = 1;
+
+Important: SET autocommit = 1 commits any pending transaction when switching
+from 0 to 1. Do not use it to discard pending work; use ROLLBACK first.
+
+2. READ COMMITTED - TWO SESSION EXPERIMENT
+
+Use two MySQL Workbench query tabs connected to the same bank_db database.
+Use account 101. Make sure both sessions are idle before starting.
+
+Session A:
+    USE bank_db;
+    SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
+    START TRANSACTION;
+    SELECT balance FROM accounts WHERE account_id = 101;
+    -- Note the first balance. Keep this transaction open.
+
+Session B:
+    USE bank_db;
+    START TRANSACTION;
+    UPDATE accounts SET balance = balance - 100 WHERE account_id = 101;
+    COMMIT;
+
+Session A:
+    SELECT balance FROM accounts WHERE account_id = 101;
+    -- Under READ COMMITTED, this second consistent read can see Session B's
+    -- newly committed balance. This is a non-repeatable read.
+    COMMIT;
+
+Expected observation:
+    The same SELECT in Session A may return a different committed balance
+    before and after Session B commits.
+
+3. REPEATABLE READ - TWO SESSION EXPERIMENT
+
+Session A:
+    USE bank_db;
+    SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+    START TRANSACTION;
+    SELECT balance FROM accounts WHERE account_id = 101;
+    -- This establishes the consistent-read snapshot.
+
+Session B:
+    USE bank_db;
+    START TRANSACTION;
+    UPDATE accounts SET balance = balance - 100 WHERE account_id = 101;
+    COMMIT;
+
+Session A:
+    SELECT balance FROM accounts WHERE account_id = 101;
+    -- A normal, non-locking consistent SELECT sees the same snapshot value
+    -- as the first SELECT, even though Session B has committed.
+    COMMIT;
+
+Expected observation:
+    The second ordinary SELECT in Session A returns the original snapshot
+    value. After Session A commits, a new SELECT sees the latest committed
+    balance.
+
+NOTE:
+    InnoDB's default isolation level is REPEATABLE READ. The snapshot for a
+    REPEATABLE READ transaction is normally established by its first
+    consistent (non-locking) read. SELECT ... FOR UPDATE and UPDATE are
+    current/locking reads and do not behave like ordinary snapshot reads.
+
+4. COMPARISON
+
+READ UNCOMMITTED:
+    A transaction may read another transaction's uncommitted changes
+    (dirty reads). Avoid for ordinary banking operations.
+
+READ COMMITTED:
+    Each consistent read gets a fresh snapshot of committed data.
+    Re-reading a row can return a newer value (non-repeatable read).
+
+REPEATABLE READ:
+    Ordinary consistent reads in one transaction use the same snapshot.
+    This is InnoDB's default and prevents non-repeatable reads for those reads.
+
+SERIALIZABLE:
+    Strongest standard isolation level. InnoDB applies stronger locking to
+    make transactions behave more like a serial sequence. It can reduce
+    concurrency and may cause transactions to wait.
+
+5. HOW TO RECORD YOUR EVIDENCE
+
+For each experiment, record:
+    - Isolation level used in Session A.
+    - First balance returned in Session A.
+    - Balance update committed by Session B.
+    - Second balance returned in Session A.
+    - Whether the second read changed.
+
+Suggested results table:
+
+    Isolation level   First read   Session B change   Second read
+    READ COMMITTED    [record]     -100               [record]
+    REPEATABLE READ   [record]     -100               [record]
+
+Run READ COMMITTED and REPEATABLE READ separately, and ROLLBACK or COMMIT
+each transaction before starting the next test. The exact balance depends
+on the starting data and how many times you run the experiment.
+
+6. CLEANUP / RESET
+
+If you want to reset account 101 to its original sample value, first ensure
+no experiment transaction is open, then run:
+    UPDATE bank_db.accounts
+       SET balance = 10000.00
+     WHERE account_id = 101;
+
+Do not run the reset while another session has an open transaction on the
+same account.
